@@ -26,3 +26,21 @@ dist-ssr
 node_modules
 dist
 .env
+.venv
+backend/.venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+node_modules/
+frontend/node_modules/
+
+# Build
+frontend/dist/
+
+# Python
+backend/.venv/
+.venv/
+__pycache__/
+*.pyc

@@ -8,10 +8,26 @@ export default function NewItemForm(props) {
 		formState: { errors },
 	} = useForm();
 
-	const onSubmit = (data) => {
-		console.log(data);
-		props.setData((prevVal) => [...prevVal, data]);
-		alert("Wyslano ekspozycje");
+	async function sendExposureList(body) {
+		const response = await fetch("http://127.0.0.1:8000/api/create_exposure/", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(body),
+		});
+		const data = await response.json();
+		return data;
+	}
+
+	const onSubmit = async (data) => {
+		const saved = await sendExposureList(data);
+
+		alert("Wyslano zgłoszenie ekspozycji");
+		props.fetchExposureList();
+		props.setLastItem(saved.id);
+		props.setVisibleData(true);
+		props.setVisibleForm(false);
 	};
 
 	return (
@@ -19,7 +35,9 @@ export default function NewItemForm(props) {
 			<div className="mb-10 mt-4 flex justify-center items-center w-full  py-5">
 				<button
 					className=" absolute w-10  left-20 cursor-pointer "
-					onClick={() => props.setVisibleForm(false)}>
+					onClick={() => {
+						props.setVisibleForm(false);
+					}}>
 					<CircleArrowLeft color="#155dfc" width={50} height={50} />
 				</button>
 				{/* <div cl> */}
@@ -39,12 +57,12 @@ export default function NewItemForm(props) {
 					<div className="flex flex-col gap-2 mb-3 w-full">
 						<label className="text-xl">Stanowisko</label>
 						<input
-						placeholder="Np. Pielęgniarka"
+							placeholder="Np. Pielęgniarka"
 							className="border p-2 rounded-2xl bg-white shadow-xs"
 							{...register("position", {
 								required: "Pole wymagane",
-								minLength: { value: 2, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								minLength: { value: 2, message: "Min. 2 znaki" },
+								maxLength: { value: 100, message: "Max. 100 znaków" },
 							})}
 						/>
 						{errors.position && (
@@ -54,12 +72,12 @@ export default function NewItemForm(props) {
 					<div className="flex flex-col gap-2 mb-3 w-full">
 						<label className="text-xl">Oddział / Komórka Organizacyjna</label>
 						<input
-						placeholder="Np. Kardiologia"
+							placeholder="Np. Kardiologia"
 							className="border p-2 rounded-2xl bg-white shadow-xs"
 							{...register("ward", {
 								required: "Pole wymagane",
-								minLength: { value: 2, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								minLength: { value: 2, message: "Min. 2 znaki" },
+								maxLength: { value: 100, message: "Max. 100 znaków" },
 							})}
 						/>
 						{errors.ward && (
@@ -68,19 +86,21 @@ export default function NewItemForm(props) {
 					</div>
 
 					<div className="flex flex-col gap-2 mb-3 w-full">
-						<label className="text-xl">Imie i nazwisko osoby poszkodowanej</label>
+						<label className="text-xl">
+							Imie i nazwisko osoby poszkodowanej
+						</label>
 						<input
-						placeholder="Np. Jan Nowak"
+							placeholder="Np. Jan Nowak"
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("personelName", {
+							{...register("personel_name", {
 								required: "Pole wymagane",
-								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								minLength: { value: 2, message: "Min. 2 znaki" },
+								maxLength: { value: 100, message: "Max. 100 znaków" },
 							})}
 						/>
-						{errors.personelName && (
+						{errors.personel_name && (
 							<p className="text-red-500 text-sm">
-								{errors.personelName.message}
+								{errors.personel_name.message}
 							</p>
 						)}
 					</div>
@@ -94,17 +114,17 @@ export default function NewItemForm(props) {
 					<div className="flex flex-col gap-2 mb-3 w-full">
 						<label className="text-xl">Imie i nazwisko osoby pacjenta</label>
 						<input
-						placeholder="Np. Jan Nowak"
+							placeholder="Np. Jan Nowak"
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("patientName", {
+							{...register("patient_name", {
 								required: "Pole wymagane",
 								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								maxLength: { value: 100, message: "Max. 100 znaków" },
 							})}
 						/>
-						{errors.patientName && (
+						{errors.patient_name && (
 							<p className="text-red-500 text-sm">
-								{errors.patientName.message}
+								{errors.patient_name.message}
 							</p>
 						)}
 					</div>
@@ -112,15 +132,15 @@ export default function NewItemForm(props) {
 						<label className="text-xl">Wywiad medyczny pacjenta</label>
 						<textarea
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("medicalReport", {
+							{...register("medical_report", {
 								required: "Pole wymagane",
 								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								maxLength: { value: 1000, message: "Max. 1000 znaków" },
 							})}
 						/>
-						{errors.medicalReport && (
+						{errors.medical_report && (
 							<p className="text-red-500 text-sm">
-								{errors.medicalReport.message}
+								{errors.medical_report.message}
 							</p>
 						)}
 					</div>
@@ -151,32 +171,34 @@ export default function NewItemForm(props) {
 						</label>
 						<input
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("typeOfExposure", {
+							{...register("type_of_exposure", {
 								required: "Pole wymagane",
 								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								maxLength: { value: 100, message: "Max. 100 znaków" },
 							})}
 						/>
-						{errors.typeOfExposure && (
+						{errors.type_of_exposure && (
 							<p className="text-red-500 text-sm">
-								{errors.typeOfExposure.message}
+								{errors.type_of_exposure.message}
 							</p>
 						)}
 					</div>
 					{/* Rodzaj materiału biologicznego (krew, płyn ustrojowy) */}
 					<div className="flex flex-col gap-2 mb-3 w-full">
-						<label className="text-xl">Rodzaj materiału biologicznego (krew, płyn ustrojowy)</label>
+						<label className="text-xl">
+							Rodzaj materiału biologicznego (krew, płyn ustrojowy)
+						</label>
 						<input
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("typeOfMaterial", {
+							{...register("type_of_material", {
 								required: "Pole wymagane",
 								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								maxLength: { value: 100, message: "Max. 100 znaków" },
 							})}
 						/>
-						{errors.typeOfMaterial && (
+						{errors.type_of_material && (
 							<p className="text-red-500 text-sm">
-								{errors.typeOfMaterial.message}
+								{errors.type_of_material.message}
 							</p>
 						)}
 					</div>
@@ -187,15 +209,15 @@ export default function NewItemForm(props) {
 						</label>
 						<textarea
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("eventDescription", {
+							{...register("event_description", {
 								required: "Pole wymagane",
 								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								maxLength: { value: 1000, message: "Max. 1000 znaków" },
 							})}
 						/>
-						{errors.eventDescription && (
+						{errors.event_description && (
 							<p className="text-red-500 text-sm">
-								{errors.eventDescription.message}
+								{errors.event_description.message}
 							</p>
 						)}
 					</div>
@@ -203,13 +225,15 @@ export default function NewItemForm(props) {
 					{/* 6. Znany / nieznany status źródła */}
 
 					<div className="flex flex-col gap-2 mb-3 w-full">
-						<label className="text-xl">Opis czynności wykonanych po ekspozycji</label>
+						<label className="text-xl">
+							Opis czynności wykonanych po ekspozycji
+						</label>
 						<textarea
 							className="border p-2 rounded-2xl bg-white shadow-xs"
-							{...register("actionsAfterExposure", {
+							{...register("actions_after_exposure", {
 								required: "Pole wymagane",
 								minLength: { value: 3, message: "Min. 3 znaki" },
-								maxLength: { value: 20, message: "Max. 20 znaków" },
+								maxLength: { value: 1000, message: "Max. 1000 znaków" },
 							})}
 						/>
 						{errors.actionsAfterExposure && (

@@ -236,9 +236,9 @@ export default function NewItemForm(props) {
 								maxLength: { value: 1000, message: "Max. 1000 znaków" },
 							})}
 						/>
-						{errors.actionsAfterExposure && (
+						{errors.actions_after_exposure && (
 							<p className="text-red-500 text-sm">
-								{errors.actionsAfterExposure.message}
+								{errors.actions_after_exposure.message}
 							</p>
 						)}
 					</div>
